@@ -178,11 +178,26 @@ void ImageProcessor::mouseDoubleClickEvent(QMouseEvent *event){
     statusBar()->showMessage(tr("雙擊:")+str,1000);
 }
 void ImageProcessor::mouseMoveEvent(QMouseEvent *event){
-    if (!img.isNull() && event->x() >= imgWin->x() && event->y() >= imgWin->y() 
-        && event->x() < imgWin->x() + imgWin->width() && event->y() < imgWin->y() + imgWin->height()) {
-        int gray = qGray(img.pixel(event->x(),event->y()));
-        QString str = "(" + QString::number(event->x()) +", " + QString::number(event->y()) + ")" + " = "+QString::number(gray);
-        MousePosLabel->setText(str);
+    // Convert window coordinates to image label coordinates
+    QPoint labelPos = imgWin->mapFrom(this, event->pos());
+    
+    // Check if the position is within the image label bounds
+    if (!img.isNull() && imgWin->rect().contains(labelPos) 
+        && labelPos.x() >= 0 && labelPos.y() >= 0) {
+        
+        // Calculate the actual image coordinates considering scaling
+        double scaleX = (double)img.width() / imgWin->width();
+        double scaleY = (double)img.height() / imgWin->height();
+        
+        int imgX = (int)(labelPos.x() * scaleX);
+        int imgY = (int)(labelPos.y() * scaleY);
+        
+        // Ensure coordinates are within image bounds
+        if (imgX >= 0 && imgX < img.width() && imgY >= 0 && imgY < img.height()) {
+            int gray = qGray(img.pixel(imgX, imgY));
+            QString str = "(" + QString::number(imgX) +", " + QString::number(imgY) + ")" + " = "+QString::number(gray);
+            MousePosLabel->setText(str);
+        }
     }
     
     if (selectingRegion && rubberBand && !origin.isNull()) {
@@ -256,9 +271,8 @@ void ImageProcessor::mouseReleaseEvent(QMouseEvent *event){
         }
         
         origin = QPoint();
-        selectingRegion = false;
         regionZoomAction->setChecked(false);
-        imgWin->setCursor(Qt::ArrowCursor);
+        enableRegionZoom(); // Use the slot to ensure consistent state management
         return;
     }
     
