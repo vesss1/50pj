@@ -1,7 +1,7 @@
 #include "imagetransform.h"
 #include <QPixmap>
 #include <QFileDialog>
-#include <Qpainter>
+#include <QPainter>
 
 ImageTransform::ImageTransform(QWidget *parent)
     : QWidget(parent)

@@ -9,8 +9,11 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QStatusBar>
+#include <QRubberBand>
+#include <QRect>
 #include "imagetransform.h"
 #include "mouseevent.h"
+#include "zoomwindow.h"
 
 class ImageProcessor : public QMainWindow
 {
@@ -24,12 +27,14 @@ public:
     void createMenus();
     void createToolBars();
     void loadFile(QString filename);
+    void openZoomWindow(const QImage &zoomedImage);
 
 private slots:
     void showOpenFile();
     void bigFile();
     void smallFile();
     void showGeometryTransform();
+    void enableRegionZoom();
 
 private:
     ImageTransform *gWin;
@@ -46,9 +51,14 @@ private:
 
     QAction     *big;
     QAction     *small;
+    QAction     *regionZoomAction;
 
     QLabel  *statusLabel;
     QLabel  *MousePosLabel;
+    
+    QRubberBand *rubberBand;
+    QPoint origin;
+    bool selectingRegion;
 
 protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
